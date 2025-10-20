@@ -15,11 +15,10 @@ screen_height = info.current_h
 surface = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
 pygame.display.set_caption("Jeu de cartes - KYB-DEV")
 
-DOSSIERS_CARTES = "/home/yan/PycharmProjects/Jeu de Carte/Cartes"
+DOSSIERS_CARTES = "/home/yan/PycharmProjects/Jeu-de-Carte/Cartes"
 cartes = {}
 
-for fichier in os.listdir(
-        DOSSIERS_CARTES):  #os.listdir(DOSSIERS_CARTES): os est un module, listdir recupere la liste des fichiers et dossiers dans le repertoire sous forme de tableau
+for fichier in os.listdir(DOSSIERS_CARTES):  #os.listdir(DOSSIERS_CARTES): os est un module, listdir recupere la liste des fichiers et dossiers dans le repertoire sous forme de tableau
     if fichier.endswith(".png"):  #Verifie si l element courant se termine par .png
         nom_carte = fichier.replace(".png", "")
         chemin = os.path.join(DOSSIERS_CARTES, fichier)

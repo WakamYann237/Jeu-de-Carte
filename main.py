@@ -36,15 +36,15 @@ class Joueur:
         self.cartes_joueur = []
         self.photo_carte = []
         main = random.sample(list(cartes.keys()), 4)
-        for carte in main:
-            self.cartes_joueur.append(carte)
-            self.photo_carte.append(cartes[carte])
+        for carte_joueur in main:
+            self.cartes_joueur.append(carte_joueur)
+            self.photo_carte.append(cartes[carte_joueur])
 
     def verification(self, carte_jeu,carte_du_joueur):
-        cle_carte_du_jeu = ""
-        for cle, val in cartes.items():
-            if carte_jeu == val:
-                cle_carte_du_jeu = cle
+        cle_carte_du_jeu = None
+        for cle_joueur, val_joueur in cartes.items():
+            if carte_jeu == val_joueur:
+                cle_carte_du_jeu = cle_joueur
         couleur_du_jeu = cle_carte_du_jeu[1]
         c = cle_carte_du_jeu[0]
         cle_du_joueur = ""
@@ -68,82 +68,71 @@ class Joueur:
         else:
             return False
 
-    def piocher(self):
-
-        indice = random.choice(list(cartes.keys()))
-        self.cartes_joueur.append(indice)
-        self.photo_carte.append(cartes[indice])
-        return self.photo_carte
-
-    def faire_piocher(self, numero):
-        if numero == "7":
-            i = 0
-            while i != 2:
-                self.piocher()
-                i = i + 1
-        elif numero == "R" or numero == "N":
-            i = 0
-            while i != 4:
-                self.piocher()
-                i += 1
-
-    def carte_total(self):
-
-        return self.photo_carte
-
-        return mon_tour
-    def ajouter_carte(self, carte_complet):
+    def ajouter_carte(self, carte_complet, carte_jo):
         nouvelle = random.choice(list(cartes.values()))
         if nouvelle not in carte_complet:
             carte_complet.append(nouvelle)
         return carte_complet
 
+    def piocher(self, numero, cartes_jouer):
+        piocher_joueur = []
+        carte_residuelle = cartes.copy()
+        for residu in cartes_jouer:
+            if residu in carte_residuelle:
+                del carte_residuelle[residu]
+        if numero == "7":
+            piocher_joueur = random.sample(list(carte_residuelle.keys()), 2)
+        elif numero == "R" or numero == "N":
+            piocher_joueur = random.sample(list(carte_residuelle.keys()), 4)
+        for cle_image in piocher_joueur:
+            self.photo_carte.append(carte_residuelle[cle_image])
+            cartes_jouer.append(cle_image)
+    def carte_total(self):
+
+        return self.photo_carte
 
 class JoueurIA:
     def __init__(self):
-        self.cartes_joueur = []
+        self.cartes_joueur_ia = []
+        self.photo_carte_ia = []
         main = random.sample(list(cartes.keys()), 4)
-        for carte in main:
-            self.cartes_joueur = carte
+        for carte_ia in main:
+            self.cartes_joueur_ia.append(carte_ia)
+            self.photo_carte_ia.append(cartes[carte_ia])
 
 
-    def jouer_ia(self, carte_jeu):
-        couleur = carte_jeu[1]
-        indices = ["2", "7", "N", "R", "A"]
-        for carte in self.cartes_joueur:
-            numero = carte[0]
-            if couleur in carte and numero not in indices:
-                return carte
-            elif numero == "2":
-                self.cartes_joueur.remove(carte)
-                return None
-            elif numero == "7" or numero == "N" or numero == "R":
-                self.faire_piocher(numero)
-                return None
-            elif numero == "A":
-                self.remplacer_carte(carte)
-        self.piocher()
+    def jouer_ia(self, carte_jeu, carte_jouers):
+        cle_deduction = None
+        for cle_d, val_d in cartes.items():
+            if carte_jeu == val_d:
+                cle_deduction = cle_d
+        couleur = cle_deduction[1]
+        numero_jeu = cle_deduction[0]
+        indices = ["2", "A"]
+        indices_pioche = ["7", "N", "R"]
+        for carte_ia in self.cartes_joueur_ia:
+            numero = carte_ia[0]
+            if couleur in carte_ia or numero_jeu == numero:
+                self.cartes_joueur_ia.remove(carte_ia)
+                if numero in indices_pioche:
+                    joueur.piocher(numero, carte_jouers)
+                carte_jouers.append(cle_deduction)
+                return cartes[carte_ia]
+            if numero_jeu in indices_pioche and carte_ia not in carte_jouers:
+                self.piocher(numero)
+        ajout = random.choice(list(cartes.keys()))
+        self.cartes_joueur_ia.append(ajout)
         return None
 
-    def piocher(self):
-
-        indice = random.choice(list(cartes.keys()))
-        self.cartes_joueur.append(indice)
-        del cartes[indice]
-
-    def faire_piocher(self, numero):
+    def piocher(self, numero):
         if numero == "7":
-            i = 0
-            while i != 2:
-                self.piocher()
-                i = i + 1
+            piocher_joueur_ia = random.sample(list(cartes.keys()), 2)
+            self.cartes_joueur_ia.append(piocher_joueur_ia)
         elif numero == "R" or numero == "N":
-            i = 0
-            while i != 4:
-                self.piocher()
-                i += 1
+            piocher_joueur_ia = random.sample(list(cartes.keys()), 4)
+            self.cartes_joueur_ia.append(piocher_joueur_ia)
 
-    def remplacer_carte(self, carte):
+    def remplacer_carte(self, carte_ia):
         pass
 
 
@@ -158,9 +147,6 @@ couleur_pique = couleurs["P"]
 rect_pique = couleur_pique.get_rect(topleft = (170, 30))
 couleur_carreau = couleurs["F"]
 rect_carreau = couleur_carreau.get_rect(topleft = (180, 30))
-pioche = Joueur()
-pioche.piocher()
-
 
 def carte():
     c_jeu = random.choice(list(cartes.keys()))
@@ -175,8 +161,8 @@ def carte():
 
 texte = pygame.font.SysFont("arial", 50, True, False)
 star_time = pygame.time.get_ticks()
-texte_joueur = texte.render("C' est votre tour", True, white_color, red_color)
-texte_joueur_ia = texte.render("Reflexion de l' IA", True, white_color, red_color)
+texte_joueur = texte.render("Vous avez joue tour de L'IA", True, white_color, red_color)
+texte_joueur_ia = texte.render("Reflexion de l' IA.........", True, white_color, red_color)
 
 carte_du_jeu = carte()
 t= 0
@@ -187,8 +173,8 @@ cartes_rects = []
 pos_x, pos_y = 50, 400
 decalage_x = 200
 tour = "joueur"
-message = ""
-
+carte_jouer = []
+cle_carte = None
 launched = True
 while launched:
     for event in pygame.event.get():
@@ -198,23 +184,28 @@ while launched:
         if tour == "joueur":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if carte_rect.collidepoint(event.pos):
-                    joueur.ajouter_carte(total_carte)
+                    joueur.ajouter_carte(total_carte, carte_jouer)
+                    joueur_ia.jouer_ia(carte_du_jeu, carte_jouer)
                     tour = "IA"
                 for rect, idx in cartes_rects:
                     if rect.collidepoint(event.pos):
                         if joueur.verification(carte_du_jeu, total_carte[idx]):
                             carte_du_jeu = total_carte[idx]
+                            for cle, val in cartes.items():
+                                if carte_du_jeu == val:
+                                    carte_jouer.append(cle)
+                                    cle_carte = cle
                             tour = "IA"
-
     for img in total_carte:
         i = len(total_carte)
-        while i > -1:
+        while i >= 0:
             rect = img.get_rect(topleft=(pos_x + i * decalage_x, pos_y))
             cartes_rects.append((rect, i))  # on garde l’index pour retrouver la carte
             i -= 1
     surface.fill(green_color)
     surface.blit(Carte, carte_rect)
     surface.blit(carte_du_jeu, (330, 30))
+
     tmp = 0
     for i in range(len(total_carte)):
         if i > 8:
@@ -231,9 +222,24 @@ while launched:
         if carte_du_jeu == img:
             total_carte.remove(img)
     if tour == "IA":
-        surface.blit(texte_joueur_ia, (150, 30))
-        pygame.display.update()
-        time.sleep(1)
+        carte_jeu_ia = carte_du_jeu
+        indice_carte = cle_carte[0]
+        if indice_carte == "A":
+           pass
+        carte_du_jeu = joueur_ia.jouer_ia(carte_du_jeu, carte_jouer)
+        if carte_du_jeu is None:
+            carte_du_jeu = carte_jeu_ia
+        surface.blit(carte_du_jeu, (330, 30))
+        carte_cle = ""
+        for cle, val in cartes.items():
+            if carte_du_jeu == val:
+                carte_jouer.append(cle)
+                carte_cle = cle
+        if carte_cle[0] == "A":
+            pass
+        carte_du_jeu = joueur_ia.jouer_ia(carte_du_jeu, carte_jouer)
+        surface.blit(carte_du_jeu, (330, 30))
+
         tour = "joueur"
 
     pygame.display.flip()
